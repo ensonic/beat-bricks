@@ -34,36 +34,46 @@ def average_cell_color_hsv(img, y, x):
 def is_note_color_hsv(color):
     h, s, v = color
     return (
-        #(-0.3 < h < 0.1 and s > 0.6 and v > 200) or  # red brick
-        #(0.8 < h < 1.2 and s > 0.3 and v > 220) or   # yellow brick
-        #(3.2 < h < 3.6 and s > 0.9 and v > 180) or   # blue brick
-        #(s < 0.1 and v > 250))                       # white brick
-        (-0.3 < h < 0.2 and s > 0.6 and v > 100) or  # red brick
-        (0.4 < h < 1.0 and s > 0.8 and v > 100) or   # yellow brick
-        (1.95 < h < 2.5 and s > 0.8 and v > 60) or   # blue brick
-        (s < 0.1 and v > 250))                       # white brick
+        (-0.3 < h < 0.2 and s > 0.8) or  # red brick
+        (0.6 < h < 1.4 and s > 0.15) or  # yellow brick
+        (3.5 < h < 3.9 and s > 0.8) or   # blue brick
+        (s < 0.1 and v > 250))           # white brick
 
 def is_clear_color_hsv(color):
     h, s, v = color
-    #return 2.5 < h < 2.9 and s > 0.7 and v > 100     # green plate
-    return 1.4 < h < 2.9 and s > 0.4 and v < 80     # green plate
+    return 1.6 < h < 2.9 and s > 0.6     # green plate
 
 
 def bgr2hsv(color):
     b, g, r = color
-    v = max(b, g, r)
-    m = min(b, g, r)
-    if v > 0:
-        s = (v - m) / v
-    else:
+    ma = max(b, g, r)
+    mi = min(b, g, r)
+    v = ma
+    if v == 0:
+        h = 0
         s = 0
-    # hue is 0 for red
-    if v == r:
-        h = (g - b) / (v - m)
-    elif v == g:
-        h = 2 + (b - r) / (v - m)
     else:
-        h = 4 + (r - g) / (v - m)
+        b /= v
+        g /= v
+        r /= v
+        ma = max(b, g, r)
+        mi = min(b, g, r)
+        s = (ma - mi)
+        if s == 0:
+          h = 0;
+        else:
+           r = (r - mi) / s
+           g = (g - mi) / s
+           b = (b - mi) / s
+           ma = max(b, g, r)
+           mi = min(b, g, r)
+           
+           if ma == r:
+             h = (g - b)
+           elif ma == g:
+             h = 2.0 +  (b - r)
+           else:
+             h = 4.0 + (r - g)
     return (h, s, v)
 
 
