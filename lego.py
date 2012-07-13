@@ -107,5 +107,5 @@ if __name__ == '__main__':
         if success:
             img = pattern_detector.process_image(frame)
             cv2.imshow(WINDOW, img)
-        if cv2.waitKey(1) == 27:
+        if cv2.waitKey(100) == 27:
             break
