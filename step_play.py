@@ -1,14 +1,15 @@
 import numpy
-import pypm
 import pygame
+import time
 
 from pattern import Pattern, PatternListener
 
 LATENCY = 8
 
+usleep = lambda x: time.sleep(x/1000000.0)
+
 class StepSequencer(object):
     def __init__(self, pattern=Pattern()):
-        pypm.Initialize()
         pygame.init()
         basepath = "/home/ensonic/Samples/[TR-808 Zone]/TR-909/"
         self.snd = []
@@ -20,35 +21,29 @@ class StepSequencer(object):
         self.snd.append(pygame.mixer.Sound(basepath + "RI/RIM127.WAV"))
         self.snd.append(pygame.mixer.Sound(basepath + "RI/RIM127.WAV"))
         self.snd.append(pygame.mixer.Sound(basepath + "RI/RIM127.WAV"))
-        self.bpm = 120
+        self.bpm = 120.0
         self.pattern = pattern
-        self.output = pypm.Output(pypm.GetDefaultOutputDeviceID(), LATENCY)
 
     @property
     def bpm(self):
-        return 15000.0 / self._step_time
+        return 15000000.0 / self._step_time
 
     @bpm.setter
     def bpm(self, bpm):
-        self._step_time = 15000.0 / bpm
+        self._step_time = 15000000.0 / bpm
+        print "tick time: %f" % self._step_time
 
     def play(self):
-        next_time = pypm.Time()
         step = -1
         while True:
-            if pypm.Time() >= next_time:
-                step = (step + 1) % 16
-                self.trigger_step(step, next_time)
-                if pypm.Time() - next_time > LATENCY:
-                    print 'WARNING: Inaccurate timing. Increase LATENCY.'
-                next_time += self._step_time
+            step = (step + 1) % 16
+            self.trigger_step(step)
+            usleep(self._step_time)
 
-    def trigger_step(self, step, timestamp):
+    def trigger_step(self, step):
         #print "tick"
         for track, note_on in enumerate(self.pattern.steps[step]):
             if note_on and not self.pattern.muted[track]:
-                #self.output.Write([[[0x90, 36 + track, 100], timestamp]])
-                #self.output.Write([[[0x80, 36 + track], timestamp]])
                 self.snd[track].play()
 
 
